@@ -1,0 +1,132 @@
+.timeline-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5rem 2rem 4rem;
+}
+
+.timeline-heading {
+  font-family: var(--font-secondary);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  text-align: left;
+  margin-bottom: 2.5rem;
+  color: var(--color-black);
+}
+
+.timeline {
+  position: relative;
+  padding-left: 56px;
+}
+
+.timeline-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 56px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.timeline-path {
+  fill: none;
+  stroke: var(--color-black);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+/* Each timeline item */
+.timeline-item {
+  position: relative;
+  padding-bottom: 2rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.45s var(--ease-out), transform 0.45s var(--ease-out);
+}
+
+.timeline-item.reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Connector dot:  SVG x-center = 28 */
+.timeline-dot {
+  position: absolute;
+  left: -34px;
+  width: 12px;
+  height: 12px;
+  background: var(--color-black);
+  border: 2px solid var(--color-black);
+  border-radius: 50%;
+  z-index: var(--z-content);
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.2s ease, transform 0.4s var(--ease-bouncy);
+}
+
+.timeline-dot.dot-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Text content */
+.timeline-content {
+  padding: 0 0 0 0.5rem;
+}
+
+.timeline-date {
+  font-family: var(--font-primary);
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.timeline-title {
+  font-family: var(--font-secondary);
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 800;
+  color: var(--color-black);
+  margin-bottom: 0.15rem;
+  line-height: 1.2;
+}
+
+.timeline-company {
+  font-family: var(--font-primary);
+  font-size: 0.85rem;
+  color: var(--color-text-light);
+  margin-bottom: 0.6rem;
+  font-style: italic;
+}
+
+.timeline-desc {
+  font-family: var(--font-primary);
+  font-size: 0.88rem;
+  color: var(--color-text-light);
+  line-height: 1.7;
+  margin: 0;
+  max-width: 680px;
+}
+
+@media (max-width: 480px) {
+  .timeline-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-dot {
+    opacity: 1;
+    transform: scale(1);
+    transition: none;
+  }
+
+  .timeline-item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
