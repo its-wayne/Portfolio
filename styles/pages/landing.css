@@ -14,8 +14,8 @@
    rises up over it. The footer overlaps the final scene's scroll (one viewport),
    so it finishes rising exactly as the pin releases. */
 .hero-footer {
-  margin-top: -100vh;
-  height: 100dvh;
+  margin-top: -90dvh;
+  height: 90dvh;
   z-index: 300;
 }
 
