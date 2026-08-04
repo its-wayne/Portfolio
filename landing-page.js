@@ -16,13 +16,13 @@ const pageRedirects = {
 // `name` (only the intro) shows the big bold headline underneath.
 const SCENES = [
     { id: 'intro',    line: "Hi, I'm",                        name: 'Wayne' },
-    { id: 'sports',   line: 'I can play\n8 sports!',          weight: 1.597 },
-    { id: 'pokemon',  line: 'I love collecting\nPokémon cards!', weight: 1.597 },
-    { id: 'teaching', line: 'I love teaching!',               weight: 1.597 },
+    { id: 'sports',   line: 'I can play\n8 sports!',          weight: 2.8 },
+    { id: 'pokemon',  line: 'I love collecting\nPokémon cards!', weight: 2.8 },
+    { id: 'teaching', line: 'I love teaching!',               weight: 2.8 },
     { id: 'final',    line: "Hi! I'm a",                    weight: 4 },
 ];
 
-// Relative scroll length per scene (beats are 20% longer than intro/final).
+// Relative scroll length per scene (each beat gets a long hold so it isn't rushed).
 const SCENE_WEIGHTS = SCENES.map(s => s.weight || 1);
 const SCENE_TOTAL = SCENE_WEIGHTS.reduce((a, b) => a + b, 0);
 const SCENE_BOUNDS = (() => {
@@ -30,8 +30,12 @@ const SCENE_BOUNDS = (() => {
     return SCENE_WEIGHTS.map(w => { const start = acc / SCENE_TOTAL; acc += w; return [start, acc / SCENE_TOTAL]; });
 })();
 
-const TYPE_SPEED = 40;   // ms per character typed
-const ERASE_SPEED = 22;  // ms per character erased
+const TYPE_SPEED = 40;   // ms per character typed (beats)
+const ERASE_SPEED = 22;  // ms per character erased (beats)
+
+// Intro typewriter — slow, mirrors the reference repo's "Hi, I'm".
+const INTRO_TYPE_SPEED = 100;                       // ms per character
+const INTRO_WORD_DELAY = Math.random() * 50 + 150;  // extra pause after a space (150–200ms)
 
 // === DOM refs ===
 let heroEl, bigEl, eyebrowEl, avatarEl, dropZoneEl, categorySelectEl, placeholderEl, scrollHintEl, pokemonCardsEl, teachingCardsEl;
@@ -50,7 +54,7 @@ const smooth = (t) => t * t * (3 - 2 * t);
 
 // --- Sports-beat emoji orbit ---
 const SPORT_EMOJIS = ['🏃', '🚣', '🏀', '🏐', '🏊', '🏸', '🏈', '🚴'];
-const ORBIT_TURNS = 1.25;   // clockwise turns across the sports beat
+const ORBIT_TURNS = 0.65;   // clockwise turns across the sports beat (lower = slower spin)
 let emojiFieldEl = null;
 let emojiEls = [];
 
@@ -109,6 +113,18 @@ async function eraseFrom(el, token) {
     }
 }
 
+// Slow intro typewriter (reference cadence): brief pause after each space.
+async function typeIntroLine(el, text, token) {
+    el.textContent = '';
+    for (const ch of text) {
+        if (token !== typeToken) return;
+        el.textContent += ch;
+        let delay = INTRO_TYPE_SPEED;
+        if (ch === ' ') delay += INTRO_WORD_DELAY;
+        await sleep(delay);
+    }
+}
+
 // ---- Scene transition ----
 async function goToScene(i) {
     if (i === currentScene) return;
@@ -132,7 +148,15 @@ async function goToScene(i) {
     bigEl.textContent = scene.name || '';
     bigEl.style.opacity = scene.name ? '1' : '0';
 
-    // The line is typed into the SAME typewriter element as "Hi, I'm".
+    // Final scene ("Hi! I'm a" + drop zone): no typewriter — set the line
+    // instantly, matching how the reference repo reveals the drag-drop.
+    if (isFinal) {
+        typeToken++;                       // cancel any in-flight typing
+        eyebrowEl.textContent = scene.line;
+        return;
+    }
+
+    // The 3 beats keep the typewriter (erase the old line, type the new one).
     if (prefersReducedMotion) {
         typeToken++;
         eyebrowEl.textContent = scene.line;
@@ -159,6 +183,15 @@ function onScroll() {
     }
     goToScene(idx);
 
+    // Name ("Wayne") slides up and fades as you scroll off the top — like Dylan's.
+    // Scroll-linked (no transition) so it tracks the wheel directly.
+    if (bigEl) {
+        const f = clamp(scrolled / 220, 0, 1);
+        bigEl.style.transition = 'none';
+        bigEl.style.transform = `translateY(${(-90 * f).toFixed(1)}px)`;
+        bigEl.style.opacity = (1 - f).toFixed(3);
+    }
+
     // Drive the sports emoji orbit with sub-progress inside the sports beat.
     const sportsIdx = SCENES.findIndex(s => s.id === 'sports');
     if (idx === sportsIdx) {
@@ -169,22 +202,61 @@ function onScroll() {
     }
 }
 
-// ---- Opening animation ----
+// ---- Opening animation (mirrors the reference repo) ----
+// "Hi, I'm" types out slowly; then the name and the waving avatar both
+// fade in and slide up; finally the scroll hint fades in and scroll unlocks.
+function setIntroInitialState() {
+    bigEl.textContent = 'Wayne';
+    bigEl.style.opacity = '0';
+    bigEl.style.transform = 'translateY(200px)';   // start below, slides up
+    scrollHintEl.classList.remove('visible');
+}
+
 async function runIntro() {
     window.scrollTo(0, 0);
     document.body.classList.add('no-scroll');
+    setIntroInitialState();
+
+    // Reduced motion: show everything immediately, no typing or sliding.
+    if (prefersReducedMotion) {
+        eyebrowEl.textContent = "Hi, I'm";
+        bigEl.style.transform = 'translateY(0)';
+        bigEl.style.opacity = '1';
+        avatarEl.classList.add('avatar-in');
+        scrollHintEl.classList.add('visible');
+        document.body.classList.remove('no-scroll');
+        currentScene = 0;
+        introDone = true;
+        return;
+    }
 
     const token = ++typeToken;
-    eyebrowEl.textContent = '';
-    bigEl.style.opacity = '1';
-    await typeInto(eyebrowEl, "Hi, I'm", token);
-    await typeInto(bigEl, "Wayne", token);
 
-    avatarEl.classList.add('avatar-in');
-    scrollHintEl.classList.add('visible');
-    currentScene = 0;
-    introDone = true;
-    document.body.classList.remove('no-scroll');
+    // Brief hold, then type the eyebrow line slowly.
+    await sleep(250);
+    if (token !== typeToken) return;
+    await typeIntroLine(eyebrowEl, "Hi, I'm", token);
+    if (token !== typeToken) return;
+
+    // Then bring in the name + avatar (fade + slide up), after a short beat.
+    await sleep(250);
+    if (token !== typeToken) return;
+
+    bigEl.style.transition = 'transform 0.7s cubic-bezier(0.2, 1.2, 0.6, 1), opacity 0.5s';
+    bigEl.style.transform = 'translateY(0)';
+    bigEl.style.opacity = '1';
+
+    avatarEl.classList.add('avatar-in');   // avatar fades + slides up (CSS)
+
+    // Once the name has slid into place, unlock scroll and reveal the hint.
+    bigEl.addEventListener('transitionend', function handler(e) {
+        if (e.propertyName !== 'transform') return;
+        document.body.classList.remove('no-scroll');
+        scrollHintEl.classList.add('visible');
+        currentScene = 0;
+        introDone = true;
+        bigEl.removeEventListener('transitionend', handler);
+    });
 }
 
 // =============== Drag & Drop (final scene) ===============

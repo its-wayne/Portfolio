@@ -6,7 +6,7 @@
 
 #hero {
   position: relative;
-  height: 531vh;              /* narrative + the final scene holds (drag-drop alone) before the footer rises */
+  height: 680vh;              /* narrative + the final scene holds (drag-drop alone) before the footer rises */
   margin-top: calc(-1 * clamp(60px, 10vh, 80px)); /* pull under the sticky nav so the pin centers in the true viewport */
 }
 
@@ -114,7 +114,7 @@ body.fade-out {
 
 .pcard-img {
   display: block;
-  width: clamp(132px, 18vw, 276px);
+  width: clamp(145px, 19.8vw, 304px);   /* Pokémon cards — 10% larger */
   height: auto;
   border-radius: 14px;
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
@@ -143,7 +143,7 @@ body.fade-out {
   transition: transform 0.9s var(--ease-bouncy), opacity 0.6s var(--ease-out);
 }
 
-.tcard .pcard-img { width: clamp(162px, 20vw, 310px); }
+.tcard .pcard-img { width: clamp(178px, 22vw, 341px); }   /* Teaching cards — 10% larger */
 
 .tcard-top    { top: clamp(1rem, 16vh, 8rem);    transform: translate(-50%, -330%) rotate(-4deg); }
 .tcard-bottom { bottom: clamp(1rem, 11vh, 7rem); transform: translate(-50%, 330%) rotate(4deg); }
@@ -208,7 +208,7 @@ body.fade-out {
   position: absolute;
   bottom: 0;
   left: 50%;
-  transform: translateX(-50%) translateY(60px);
+  transform: translateX(-50%) translateY(100px);
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -216,8 +216,9 @@ body.fade-out {
   z-index: 3;
   opacity: 0;
   will-change: transform, opacity;
-  transition: opacity var(--duration-slow) var(--ease-out),
-              transform var(--duration-slow) var(--ease-bouncy);
+  /* Reference-repo intro cadence: fade + bouncy slide-up. */
+  transition: opacity 0.5s var(--ease-out),
+              transform 1.2s cubic-bezier(0.4, 1.25, 0.6, 1);
 }
 
 .bottom-gif.avatar-in {

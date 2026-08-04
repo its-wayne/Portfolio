@@ -89,10 +89,13 @@
 }
 
 @media (max-width: 460px) {
-  .job-role-container {
+  .job-role-container,
+  .hero-eyebrow-row {
     flex-direction: column;
     align-items: center;
     gap: var(--gap-small);
+    white-space: normal;   /* let "Hi! I'm a" + drop zone stack instead of overflow */
+    min-height: 0;
   }
 
   #category-drop-zone {
@@ -100,6 +103,18 @@
     justify-content: center;
     min-height: 50px;
   }
+}
+
+/* ----- Custom scroll-story hero (index): keep the flanking photo cards from
+   crowding the centered beat text on narrow phones ----- */
+@media (max-width: 480px) {
+  /* Pokémon cards: smaller and hugged to the edges. */
+  .pcard-img { width: clamp(84px, 26vw, 150px); }
+  .pcard-left  { left: 0.25rem; }
+  .pcard-right { right: 0.25rem; }
+
+  /* Teaching cards are centered — just cap their size. */
+  .tcard .pcard-img { width: clamp(120px, 34vw, 210px); }
 }
 
 /* ----- Gallery columns ----- */
