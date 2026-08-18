@@ -97,8 +97,12 @@ body.fade-out {
   transition: transform 0.9s var(--ease-bouncy), opacity 0.6s var(--ease-out);
 }
 
-.pcard-left  { left:  clamp(0.5rem, 5vw, 6rem); transform: translate(-260%, -50%) rotate(-6deg); }
-.pcard-right { right: clamp(0.5rem, 5vw, 6rem); transform: translate(260%, -50%) rotate(6deg); }
+/* Anchor each card by its INNER edge, offset from the hero centre by half the
+   reserved text width plus a gap, so the card never overlaps the centred text.
+   The reserved half-width (16vw + 150px) is a safe envelope for the widest
+   line ("I love collecting"), whose ink width tracks ~0.306·vw + 290px. */
+.pcard-left  { right: calc(50% + 16vw + 168px); left: auto; transform: translate(-260%, -50%) rotate(-6deg); }
+.pcard-right { left:  calc(50% + 16vw + 168px); right: auto; transform: translate(260%, -50%) rotate(6deg); }
 
 .pokemon-cards.in .pcard { opacity: 1; }
 .pokemon-cards.in .pcard-left  { transform: translate(0, -50%) rotate(-6deg); }
@@ -120,6 +124,11 @@ body.fade-out {
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
   transition: transform 0.3s var(--ease-bouncy), box-shadow 0.3s var(--ease-out);
 }
+
+/* Anchor the hover pop-up at each card's inner edge (the one facing the
+   centered text) so it grows outward and the gap to the text never shrinks. */
+.pcard-left  .pcard-img { transform-origin: right center; }
+.pcard-right .pcard-img { transform-origin: left center; }
 
 .pcard:hover .pcard-img,
 .tcard:hover .pcard-img {
@@ -145,13 +154,21 @@ body.fade-out {
 
 .tcard .pcard-img { width: clamp(178px, 22vw, 341px); }   /* Teaching cards — 10% larger */
 
-.tcard-top    { top: clamp(1rem, 16vh, 8rem);    transform: translate(-50%, -330%) rotate(-4deg); }
-.tcard-bottom { bottom: clamp(1rem, 11vh, 7rem); transform: translate(-50%, 330%) rotate(4deg); }
+/* Triangle: two cards flank above the text, one sits centred below. The top
+   pair is anchored to the left/right gutters (well clear of the centred line),
+   and slides down into place; the bottom card slides up from below. */
+.tcard-top-left,
+.tcard-top-right { top: clamp(0.75rem, 8vh, 4.5rem); }
+.tcard-top-left  { left: clamp(1rem, 9vw, 11rem);            transform: translate(0, -330%) rotate(-5deg); }
+.tcard-top-right { left: auto; right: clamp(1rem, 9vw, 11rem); transform: translate(0, -330%) rotate(5deg); }
+.tcard-bottom    { bottom: clamp(1rem, 11vh, 7rem);         transform: translate(-50%, 330%) rotate(4deg); }
 
-.teaching-cards.in .tcard-top    { transform: translate(-50%, 0) rotate(-4deg); opacity: 1; }
-.teaching-cards.in .tcard-bottom { transform: translate(-50%, 0) rotate(4deg); opacity: 1; }
+.teaching-cards.in .tcard-top-left  { transform: translate(0, 40px) rotate(-5deg); opacity: 1; }
+.teaching-cards.in .tcard-top-right { transform: translate(0, 0) rotate(5deg);  opacity: 1; }
+.teaching-cards.in .tcard-bottom    { transform: translate(-50%, 0) rotate(4deg); opacity: 1; }
 
-.tcard-bottom .pcard-float { animation-delay: 0.5s; }
+.tcard-top-right .pcard-float { animation-delay: 0.35s; }
+.tcard-bottom .pcard-float    { animation-delay: 0.5s; }
 
 @media (prefers-reduced-motion: reduce) {
   .emoji-inner, .pcard-float { animation: none; }
