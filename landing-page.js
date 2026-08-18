@@ -7,8 +7,8 @@
 // Where each identity sends you when dropped (final scene).
 const pageRedirects = {
     // "Friend" and "Explorer" have no destination yet — they just drop in place.
-    "Programmer": "projects.html"
-    // TODO: "Student": "students.html"  ← dedicated TA page (to be built)
+    "Programmer": "projects.html",
+    "Student": "students.html"
 };
 
 // The story, in order. `big` is the large headline; `eyebrow` is the small line.
