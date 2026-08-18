@@ -29,6 +29,7 @@
 /* ---- Pages ---- */
 @import url('./pages/landing.css');
 @import url('./pages/projects.css');
+@import url('./pages/students.css');
 
 /* ---- Modal lives between projects and form because the 3D viewer modal
         is opened from the projects page; keeping it after projects.css

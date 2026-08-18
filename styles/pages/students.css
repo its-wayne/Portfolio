@@ -1,0 +1,28 @@
+/*
+  students.css — Student Resources page.
+  Reuses the project photocard (.project-card) from projects.css and lays
+  them out 3 per row via .students-grid. Collapses to 2, then 1, on narrow
+  viewports so cards never get too cramped.
+*/
+
+.students-section > .container {
+  padding-top: 2.5rem;
+  padding-bottom: 4rem;
+}
+
+/* Force exactly 3 cards per row (projects' .project-list uses auto-fit). */
+.students-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 900px) {
+  .students-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .students-grid {
+    grid-template-columns: 1fr;
+  }
+}

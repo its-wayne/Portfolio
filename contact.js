@@ -1,5 +1,5 @@
 // Paste your Google Apps Script Web app URL here (Deploy → Web app → copy URL).
-const CONTACT_ENDPOINT = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+const CONTACT_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwAX-nTmg40NSpOvThSA0UMD-gdKBHMHRXkPQKSamSm6AZ-z2rVSobqWE9St0ssCCKs/exec';
 
 function sendEmail(event) {
   event.preventDefault();
