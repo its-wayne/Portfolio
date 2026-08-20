@@ -307,9 +307,29 @@ body.fade-out {
   padding: 0.5em;
   margin: 0.2em;
   user-select: none;
+  /* Let JS own touch gestures on these chips so a drag doesn't scroll the page. */
+  touch-action: none;
   color: var(--color-black);
   animation: wave 2s ease-in-out infinite;
   transition: all 0.2s var(--ease-default);
+}
+
+/* Finger-following clone shown while touch-dragging an identity chip. */
+.drag-ghost {
+  position: fixed;
+  z-index: 9999;
+  margin: 0;
+  pointer-events: none;
+  opacity: 0.9;
+  font-family: var(--font-primary);
+  font-size: clamp(1rem, 1.1rem + 3vw, 4rem);
+  font-weight: 300;
+  color: var(--color-black);
+  border: var(--border-width-medium) solid var(--color-black);
+  border-radius: var(--radius-pill);
+  padding: 0.5em 1.2em;
+  background: var(--color-white, #fff);
+  animation: none;
 }
 
 .categorySelect span[draggable="true"]:hover {

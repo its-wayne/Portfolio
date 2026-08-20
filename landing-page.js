@@ -287,32 +287,27 @@ function handleDragOver(event) {
     if (placeholderEl) updateEyebrowArticle(placeholderEl.textContent);
 }
 
-function handleDrop(event) {
-    event.preventDefault();
-    const draggedId = event.dataTransfer.getData("text/plain");
-    const dragged = document.getElementById(draggedId);
-    const zone = event.currentTarget;
+// Core placement logic — shared by mouse drag-and-drop and touch dragging.
+function moveToDropZone(dragged) {
+    if (!dragged) return;
+    const existing = dropZoneEl.querySelector('.draggable-item');
+    if (existing) returnToTray(existing);
 
-    const existing = zone.querySelector('.draggable-item');
-    if (existing) handleReturnDrop({ preventDefault() {}, currentTarget: categorySelectEl, dataTransfer: { getData: () => existing.id } });
-
-    zone.appendChild(dragged);
+    dropZoneEl.appendChild(dragged);
     updateEyebrowArticle(dragged.id);
 
-    const redirectUrl = pageRedirects[draggedId];
+    const redirectUrl = pageRedirects[dragged.id];
     if (redirectUrl) {
         document.body.classList.add('fade-out');
         setTimeout(() => { window.location.href = redirectUrl; }, 500);
     }
 }
 
-function handleReturnDrop(event) {
-    event.preventDefault();
-    const draggedId = event.dataTransfer.getData("text/plain");
-    const dragged = document.getElementById(draggedId);
-    const zone = event.currentTarget;
+function returnToTray(dragged) {
     if (!dragged) return;
+    const zone = categorySelectEl;
 
+    // Re-insert the item at its original position in the tray.
     const droppedIndex = initialOrder.indexOf(dragged.id);
     let nextSibling = null;
     for (let i = droppedIndex + 1; i < initialOrder.length; i++) {
@@ -323,6 +318,75 @@ function handleReturnDrop(event) {
     else zone.appendChild(dragged);
 
     if (!dropZoneEl.querySelector('.draggable-item')) eyebrowEl.textContent = "Hi! I'm a";
+}
+
+function handleDrop(event) {
+    event.preventDefault();
+    dropZoneEl.classList.remove('drag-over');
+    moveToDropZone(document.getElementById(event.dataTransfer.getData("text/plain")));
+}
+
+function handleReturnDrop(event) {
+    event.preventDefault();
+    returnToTray(document.getElementById(event.dataTransfer.getData("text/plain")));
+}
+
+// =============== Touch dragging (mobile fallback for HTML5 drag) ===============
+// HTML5 drag events never fire on touchscreens, so we emulate a drag with a
+// finger-following clone and hit-test the release point with elementFromPoint.
+let touchDrag = null;
+
+function handleTouchStart(event) {
+    const item = event.currentTarget;
+    const touch = event.touches[0];
+    const rect = item.getBoundingClientRect();
+
+    const ghost = item.cloneNode(true);
+    ghost.classList.add('drag-ghost');
+    ghost.style.left = rect.left + 'px';
+    ghost.style.top = rect.top + 'px';
+    ghost.style.width = rect.width + 'px';
+    document.body.appendChild(ghost);
+
+    touchDrag = { item, ghost, offsetX: touch.clientX - rect.left, offsetY: touch.clientY - rect.top };
+    item.style.opacity = '0.35';
+
+    // Mirror handleDragStart: preview the identity in the empty drop zone.
+    if (!dropZoneEl.querySelector('.draggable-item') && placeholderEl) {
+        placeholderEl.textContent = item.id;
+        updateEyebrowArticle(item.id);
+    }
+}
+
+function handleTouchMove(event) {
+    if (!touchDrag) return;
+    event.preventDefault();   // hold the page still while dragging an item
+    const touch = event.touches[0];
+    touchDrag.ghost.style.left = (touch.clientX - touchDrag.offsetX) + 'px';
+    touchDrag.ghost.style.top = (touch.clientY - touchDrag.offsetY) + 'px';
+
+    const over = document.elementFromPoint(touch.clientX, touch.clientY);
+    dropZoneEl.classList.toggle('drag-over', !!over && (over === dropZoneEl || dropZoneEl.contains(over)));
+}
+
+function handleTouchEnd(event) {
+    if (!touchDrag) return;
+    const touch = event.changedTouches[0];
+    const { item, ghost } = touchDrag;
+
+    ghost.remove();
+    item.style.opacity = '1';
+    if (placeholderEl) placeholderEl.textContent = '';
+    dropZoneEl.classList.remove('drag-over');
+    touchDrag = null;
+
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (target && (target === dropZoneEl || dropZoneEl.contains(target))) {
+        moveToDropZone(item);
+    } else if (target && (target === categorySelectEl || categorySelectEl.contains(target))) {
+        returnToTray(item);
+    }
+    // Dropped elsewhere: leave the item where it was.
 }
 
 // =============== Init ===============
@@ -349,6 +413,12 @@ window.addEventListener('DOMContentLoaded', () => {
         draggableItems.forEach(item => {
             item.addEventListener('dragstart', handleDragStart);
             item.addEventListener('dragend', handleDragEnd);
+            // Touch equivalents (touchmove needs passive:false so we can
+            // preventDefault and stop the page scrolling mid-drag).
+            item.addEventListener('touchstart', handleTouchStart, { passive: true });
+            item.addEventListener('touchmove', handleTouchMove, { passive: false });
+            item.addEventListener('touchend', handleTouchEnd);
+            item.addEventListener('touchcancel', handleTouchEnd);
             initialOrder.push(item.id);
         });
         categorySelectEl.addEventListener('dragover', handleDragOver);
