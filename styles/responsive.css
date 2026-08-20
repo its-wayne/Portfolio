@@ -117,6 +117,30 @@
   .tcard .pcard-img { width: clamp(120px, 34vw, 210px); }
 }
 
+/* ----- Portrait windows: the side-by-side beat cards look cramped in a tall
+   aspect ratio, so restack them. Placed after the max-width rules above so it
+   overrides the left/right edge anchoring on portrait phones too. ----- */
+@media (orientation: portrait) {
+  /* Pokémon: one card on top, one on the bottom — both centered. */
+  .pcard-left {
+    top: clamp(1rem, 8vh, 5rem); bottom: auto;
+    left: 50%; right: auto;
+    transform: translate(-50%, -260%) rotate(-6deg);
+  }
+  .pcard-right {
+    top: auto; bottom: clamp(1rem, 8vh, 5rem);
+    left: 50%; right: auto;
+    transform: translate(-50%, 260%) rotate(6deg);
+  }
+  .pokemon-cards.in .pcard-left  { transform: translate(-50%, 0) rotate(-6deg); }
+  .pokemon-cards.in .pcard-right { transform: translate(-50%, 0) rotate(6deg); }
+
+  /* Teaching: keep the triangle, but tuck the top pair 200px in toward the
+     centered text so they don't hug the window edges. */
+  .teaching-cards.in .tcard-top-left  { transform: translate(200px, 40px) rotate(-5deg); }
+  .teaching-cards.in .tcard-top-right { transform: translate(-200px, 0) rotate(5deg); }
+}
+
 /* ----- Gallery columns ----- */
 @media (min-width: 600px) {
   .gallery-grid {
